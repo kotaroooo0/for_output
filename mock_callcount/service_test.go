@@ -7,10 +7,12 @@ import (
 )
 
 type UserRepositoryMock struct {
-	Client *redis.Client
+	Client            *redis.Client
+	FindUserCallCount int
 }
 
 func (h UserRepositoryMock) FindUser(id string) (User, error) {
+	h.FindUserCallCount++
 	// なんか
 	return User{Id: id}, nil
 }
@@ -24,8 +26,6 @@ func TestFindUserById(t *testing.T) {
 
 	userService.FindUserById()
 	userService.FindUserById()
-	// ここでUserRepositoryのFindUserメソッドは何度呼ばれたかをテストしたい
-	// ここではServiceのFindByIdとRepositoryのFindUserは1:1なので明らかに2回
-	userService.FindUserById()
-	userService.FindUserById()
+	// 呼び出し回数を取得できる
+	callCount := userService.UserRepository.FindUserCallCount
 }
