@@ -11,14 +11,10 @@ import (
 
 // 	go func() {
 // 		for {
-// 			time.Sleep(time.Second)
-// 			rand := rand.Float64()
-// 			fmt.Println(rand)
-// 			if rand < 0.2 {
+// 			fmt.Println("Waiting...")
+// 			if requestApi() {
 // 				q <- struct{}{}
 // 			}
-
-// 			fmt.Println("Waiting...")
 // 			time.Sleep(1 * time.Second)
 // 		}
 // 	}()
@@ -29,11 +25,37 @@ import (
 // 		}
 
 // 		// q に溜まるまで他の事をしたい
-// 		time.Sleep(100 * time.Millisecond)
-// 		fmt.Println("並列実行")
+// 		time.Sleep(time.Second)
+// 		fmt.Println("Do something")
 // 	}
 
 // 	fmt.Println("Finish")
+// }
+
+func requestApi() bool {
+	time.Sleep(time.Second)
+	if rand.Float64() < 0.2 {
+		return true
+	}
+	return false
+}
+
+// func main() {
+// 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+// 	defer cancel()
+
+// 	fmt.Println("goroutine start")
+// 	go func() {
+// 		for {
+// 			if requestApi() {
+// 				fmt.Println("goroutine done")
+// 				cancel()
+// 			}
+// 		}
+// 	}()
+
+// 	<-ctx.Done()
+// 	fmt.Println("main done")
 // }
 
 func main() {
@@ -41,18 +63,16 @@ func main() {
 
 	go func() {
 		for {
+			fmt.Println("Waiting...")
 			rand := rand.Float64()
 			fmt.Println(rand)
-			if rand < 0.2 {
-				q <- struct{}{}
+			if rand < 0.5 {
+				q <- struct{}{} // qに入れる
 			}
-
-			fmt.Println("Waiting...")
 			time.Sleep(1 * time.Second)
 		}
 	}()
 
-	// q に何か入るまで待つ
-	<-q
+	<-q // q に何か入るまで待つ
 	fmt.Println("Finish")
 }
