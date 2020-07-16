@@ -6,8 +6,51 @@ import (
 )
 
 func main() {
-	validate(false)
-	refelcttest()
+	//validate(false)
+	//refelcttest()
+
+	p := &Point{5, 10}
+	m := toMap(p)
+
+	pp := &Point{}
+	toStruct(m, pp)
+	fmt.Println(pp)
+
+	u := &User{123, "kotaroooo0", 24}
+	mm := toMap(u)
+	fmt.Println(mm)
+
+	uu := &User{}
+	toStruct(mm, uu)
+	fmt.Println(uu)
+
+}
+
+type User struct {
+	Id   int
+	Name string
+	Age  int
+}
+
+func toMap(v interface{}) map[string]interface{} {
+	m := make(map[string]interface{})
+	rv := reflect.ValueOf(v).Elem()
+	rt := rv.Type()
+	for i := 0; i < rt.NumField(); i++ {
+		ftv := rt.Field(i)
+		fv := rv.Field(i)
+		if rv.CanSet() {
+			m[ftv.Name] = fv.Interface()
+		}
+	}
+	return m
+}
+
+func toStruct(m map[string]interface{}, s interface{}) {
+	rv := reflect.ValueOf(s).Elem()
+	for k, v := range m {
+		rv.FieldByName(k).Set(reflect.ValueOf(v))
+	}
 }
 
 func validate(x interface{}) error {
