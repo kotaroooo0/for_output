@@ -16,15 +16,19 @@ func main() {
 		log.Fatal(err)
 	}
 
-	db, err := sql.Open("mysql", "root:password@tcp(rdb:3306)/performance_schema")
-	defer db.Close()
+	db, err := sql.Open("mysql", "root:password@tcp(mysql:3306)/performance_schema")
 	if err != nil {
 		log.Fatal(err)
 	}
-	if err := db.Ping(); err != nil {
-		log.Fatal(err)
+	defer db.Close()
+
+	for {
+		err = db.Ping()
+		if err == nil {
+			break
+		}
+		time.Sleep(3 * time.Second)
 	}
 
 	log.Println("success")
-	time.Sleep(1000000000 * time.Second)
 }
