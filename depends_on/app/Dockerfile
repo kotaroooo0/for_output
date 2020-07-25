@@ -10,6 +10,7 @@ RUN go build -o main
 
 FROM alpine:latest
 
+COPY --from=builder /go/src/github.com/kotaroooo0/for_output/depends_on/wait-for-it.sh /wait-for-it.sh
 COPY --from=builder /go/src/github.com/kotaroooo0/for_output/depends_on/main /main
 
-ENTRYPOINT ["/main"]
+CMD ["/main"]

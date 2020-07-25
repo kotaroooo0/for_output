@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"time"
 
 	"github.com/go-redis/redis/v7"
 	_ "github.com/go-sql-driver/mysql"
@@ -22,13 +21,18 @@ func main() {
 	}
 	defer db.Close()
 
-	for {
-		err = db.Ping()
-		if err == nil {
-			break
-		}
-		time.Sleep(3 * time.Second)
+	if err = db.Ping(); err != nil {
+		log.Fatal()
 	}
+
+	// アプリケーションでの稼働待ち
+	// for {
+	// 	err = db.Ping()
+	// 	if err == nil {
+	// 		break
+	// 	}
+	// 	time.Sleep(3 * time.Second)
+	// }
 
 	log.Println("success")
 }

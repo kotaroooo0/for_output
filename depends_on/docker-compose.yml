@@ -1,21 +1,23 @@
 version: "3"
 
 services:
-    app:
-        build: app
-        depends_on:
-            - redis
-            - mysql
-    mysql:
-        image: mysql:5.7
-        ports:
-            - "3306:3306"
-        environment:
-            MYSQL_ROOT_PASSWORD: password
-            MYSQL_DATABASE: sample
+  app:
+    build: app
+    depends_on:
+      - redis
+      - mysql
+    command: ["./wait-for-it.sh", "./main"]
 
-    redis:
-        image: redis:6.0.5-alpine
-        ports:
-            - "6379:6379"
+  mysql:
+    image: mysql:5.7
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: sample
+
+  redis:
+    image: redis:6.0.5-alpine
+    ports:
+      - "6379:6379"
 
