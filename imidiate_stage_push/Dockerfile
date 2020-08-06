@@ -5,7 +5,7 @@ RUN sleep 3 && touch stage1.txt
 
 
 FROM alpine:latest as stage2
-LABEL stage=
+LABEL stage=2
 WORKDIR /workdir
 RUN sleep 6 && touch stage2.txt
 
