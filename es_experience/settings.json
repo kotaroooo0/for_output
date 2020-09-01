@@ -1,0 +1,96 @@
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "oreno_analyzer": {
+          "type": "custom",
+          "char_filter": ["normalize"],
+          "tokenizer": "oreno_sudachi",
+          "filter": [
+            "lowercase",
+            "clinic_synonym",
+            "spos",
+            "readingform",
+            "engram"
+          ]
+        }
+      },
+      "char_filter": {
+        "normalize": {
+          "type": "icu_normalizer",
+          "name": "nfkc",
+          "mode": "compose"
+        }
+      },
+      "tokenizer": {
+        "oreno_sudachi": {
+          "type": "sudachi_tokenizer",
+          "mode": "search",
+          "settings_path": "/usr/share/elasticsearch/config/sudachi/sudachi.json",
+          "resources_path": "/usr/share/elasticsearch/config/sudachi/"
+        }
+      },
+      "filter": {
+        "engram": {
+          "type": "edgeNGram",
+          "min_gram": 1,
+          "max_gram": 50
+        },
+        "readingform": {
+          "type": "sudachi_readingform",
+          "use_romaji": false
+        },
+        "clinic_synonym": {
+          "type": "synonym",
+          "lenient": true,
+          "expand": false,
+          "synonyms_path": "/usr/share/elasticsearch/config/sudachi/synonyms.txt"
+        },
+        "spos": {
+          "type": "sudachi_part_of_speech",
+          "stoptags": ["助詞", "助動詞", "補助記号,句点", "補助記号,読点"]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "date_detection": false,
+    "dynamic_templates": [
+      {
+        "string_fields": {
+          "mapping": {
+            "type": "keyword",
+            "ignore_above": 1024,
+            "boost": 0,
+            "doc_values": true,
+            "eager_global_ordinals": true,
+            "norms": false,
+            "index_options": "docs",
+            "store": false,
+            "similarity": "BM25",
+            "split_queries_on_whitespace": false,
+            "fields": {
+              "morpheme": {
+                "type": "text",
+                "norms": true,
+                "boost": 1,
+                "eager_global_ordinals": false,
+                "fielddata": false,
+                "index_options": "freqs",
+                "index_prefixes": {},
+                "index_phrases": false,
+                "store": false,
+                "similarity": "BM25",
+                "analyzer": "oreno_analyzer",
+                "search_analyzer": "oreno_analyzer"
+              }
+            }
+          },
+          "match_mapping_type": "string",
+          "match": "*"
+        }
+      }
+    ],
+    "properties": {}
+  }
+}
