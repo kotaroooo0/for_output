@@ -1,10 +1,7 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/kotaroooo0/stalefish"
-	"github.com/kotaroooo0/stalefish/morphology"
 )
 
 // func main() {
@@ -40,14 +37,29 @@ import (
 // 	fmt.Println(analyzer.Analyze("I have a lot of TASKs. I feel very tired :("))
 // }
 
+// func main() {
+// 	kagome, _ := morphology.NewKagome()
+// 	analyzer := stalefish.NewAnalyzer(
+// 		[]stalefish.CharFilter{},
+// 		stalefish.NewMorphologicalTokenizer(kagome),
+// 		[]stalefish.TokenFilter{stalefish.NewReadingformFilter(stalefish.Romaji)},
+// 	)
+// 	fmt.Println(analyzer.Analyze("東京と京都"))
+// }
+
 func main() {
-	kagome, _ := morphology.NewKagome()
+	db, _ := stalefish.NewDBClient(stalefish.NewDBConfig("root", "password", "127.0.0.1", "3306", "stalefish"))
+	storage := stalefish.NewStorageRdbImpl(db)
 	analyzer := stalefish.NewAnalyzer(
 		[]stalefish.CharFilter{},
-		stalefish.NewMorphologicalTokenizer(kagome),
-		[]stalefish.TokenFilter{stalefish.NewReadingformFilter(stalefish.Romaji)},
+		stalefish.NewStandardTokenizer(),
+		[]stalefish.TokenFilter{},
 	)
-	fmt.Println(analyzer.Analyze("東京と京都"))
+
+	indexer := stalefish.NewIndexer(storage, analyzer, make(stalefish.InvertedIndex))
+	indexer.AddDocument(stalefish.NewDocument("go ruby javascript"))
+	indexer.AddDocument(stalefish.NewDocument("go python typescript"))
+	indexer.AddDocument(stalefish.NewDocument("go perl flutter"))
 }
 
 // func main() {
