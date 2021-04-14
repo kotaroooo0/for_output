@@ -1,32 +1,34 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/kotaroooo0/stalefish"
 )
 
-// func main() {
-// 	db, _ := stalefish.NewDBClient(stalefish.NewDBConfig("root", "password", "127.0.0.1", "3306", "stalefish"))
-// 	storage := stalefish.NewStorageRdbImpl(db)
-// 	analyzer := stalefish.NewAnalyzer(
-// 		[]stalefish.CharFilter{}, stalefish.NewStandardTokenizer(), []stalefish.TokenFilter{stalefish.NewStemmerFilter(), stalefish.NewLowercaseFilter(), stalefish.NewStopWordFilter()},
-// 	)
+func main() {
+	db, _ := stalefish.NewDBClient(stalefish.NewDBConfig("root", "password", "127.0.0.1", "3306", "stalefish"))
+	storage := stalefish.NewStorageRdbImpl(db)
+	analyzer := stalefish.NewAnalyzer(
+		[]stalefish.CharFilter{}, stalefish.NewStandardTokenizer(), []stalefish.TokenFilter{stalefish.NewStemmerFilter(), stalefish.NewLowercaseFilter(), stalefish.NewStopWordFilter()},
+	)
 
-// 	indexer := stalefish.NewIndexer(storage, analyzer, make(stalefish.InvertedIndex))
-// 	indexer.AddDocument(stalefish.NewDocument("You can watch lots of interesting dramas on Amazon Prime."))
-// 	indexer.AddDocument(stalefish.NewDocument("Forest phenomena in the Amazon are a prime concern."))
+	indexer := stalefish.NewIndexer(storage, analyzer, make(stalefish.InvertedIndex))
+	indexer.AddDocument(stalefish.NewDocument("You can watch lots of interesting dramas on Amazon Prime."))
+	indexer.AddDocument(stalefish.NewDocument("Forest phenomena in the Amazon are a prime concern."))
 
-// 	pq := stalefish.NewPhraseQuery("amAzon PRime", analyzer)
-// 	pseacher := pq.Searcher(storage)
-// 	result, _ := pseacher.Search()
-// 	fmt.Println(result)
-// 	// result: [{1 You can watch lots of interesting dramas on Amazon Prime.}]
+	pq := stalefish.NewPhraseQuery("amAzon PRime", analyzer)
+	pseacher := pq.Searcher(storage)
+	result, _ := pseacher.Search()
+	fmt.Println(result)
+	// result: [{1 You can watch lots of interesting dramas on Amazon Prime.}]
 
-// 	mq := stalefish.NewMatchQuery("amazon concerns", stalefish.AND, analyzer)
-// 	mseacher := mq.Searcher(storage)
-// 	result, _ = mseacher.Search()
-// 	fmt.Println(result)
-// 	// result: [{2 Forest phenomena in the Amazon are a prime concern.}]
-// }
+	mq := stalefish.NewMatchQuery("amazon concerns", stalefish.AND, analyzer)
+	mseacher := mq.Searcher(storage)
+	result, _ = mseacher.Search()
+	fmt.Println(result)
+	// result: [{2 Forest phenomena in the Amazon are a prime concern.}]
+}
 
 // func main() {
 // 	analyzer := stalefish.NewAnalyzer(
@@ -47,20 +49,20 @@ import (
 // 	fmt.Println(analyzer.Analyze("東京と京都"))
 // }
 
-func main() {
-	db, _ := stalefish.NewDBClient(stalefish.NewDBConfig("root", "password", "127.0.0.1", "3306", "stalefish"))
-	storage := stalefish.NewStorageRdbImpl(db)
-	analyzer := stalefish.NewAnalyzer(
-		[]stalefish.CharFilter{},
-		stalefish.NewStandardTokenizer(),
-		[]stalefish.TokenFilter{},
-	)
+// func main() {
+// 	db, _ := stalefish.NewDBClient(stalefish.NewDBConfig("root", "password", "127.0.0.1", "3306", "stalefish"))
+// 	storage := stalefish.NewStorageRdbImpl(db)
+// 	analyzer := stalefish.NewAnalyzer(
+// 		[]stalefish.CharFilter{},
+// 		stalefish.NewStandardTokenizer(),
+// 		[]stalefish.TokenFilter{},
+// 	)
 
-	indexer := stalefish.NewIndexer(storage, analyzer, make(stalefish.InvertedIndex))
-	indexer.AddDocument(stalefish.NewDocument("go ruby javascript"))
-	indexer.AddDocument(stalefish.NewDocument("go python typescript"))
-	indexer.AddDocument(stalefish.NewDocument("go perl flutter"))
-}
+// 	indexer := stalefish.NewIndexer(storage, analyzer, make(stalefish.InvertedIndex))
+// 	indexer.AddDocument(stalefish.NewDocument("go ruby javascript"))
+// 	indexer.AddDocument(stalefish.NewDocument("go python typescript"))
+// 	indexer.AddDocument(stalefish.NewDocument("go perl flutter"))
+// }
 
 // func main() {
 // mq := stalefish.NewMatchQuery("interesting night", stalefish.AND, analyzer)
