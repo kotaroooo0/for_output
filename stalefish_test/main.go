@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/k0kubun/pp"
 	"github.com/kotaroooo0/gojaconv/jaconv"
 	"github.com/kotaroooo0/stalefish"
 )
@@ -45,6 +46,8 @@ func main() {
 	indexer.AddDocument(stalefish.NewDocument("Go PHP Python"))
 	indexer.AddDocument(stalefish.NewDocument("Go Python Ruby"))
 
+	pp.Println(storage.GetInvertedIndexByTokenIDs([]stalefish.TokenID{stalefish.TokenID(0), stalefish.TokenID(1)}))
+
 	mq := stalefish.NewMatchQuery("GO PHP", stalefish.AND, analyzer)
 	mseacher := mq.Searcher(storage)
 	result, _ := mseacher.Search()
@@ -54,6 +57,30 @@ func main() {
 	pseacher := pq.Searcher(storage)
 	result, _ = pseacher.Search()
 	fmt.Println(result) // result: [{2 Go PHP Python}]
+
+	// stalefish.InvertedIndex{
+	// 	0x0000000000000001: stalefish.PostingList{
+	// 	  Postings: &stalefish.Postings{
+	// 		DocumentID: 0x0000000000000001,
+	// 		Positions:  []uint64{
+	// 		  0x0000000000000000,
+	// 		},
+	// 		Next: &stalefish.Postings{
+	// 		  DocumentID: 0x0000000000000002,
+	// 		  Positions:  []uint64{
+	// 			0x0000000000000000,
+	// 		  },
+	// 		  Next: &stalefish.Postings{
+	// 			DocumentID: 0x0000000000000003,
+	// 			Positions:  []uint64{
+	// 			  0x0000000000000000,
+	// 			},
+	// 			Next: (*stalefish.Postings)(nil),
+	// 		  },
+	// 		},
+	// 	  },
+	// 	},
+	//   }
 }
 
 // func main() {
@@ -62,7 +89,7 @@ func main() {
 // 		stalefish.NewStandardTokenizer(),
 // 		[]stalefish.TokenFilter{stalefish.NewLowercaseFilter(), stalefish.NewStemmerFilter(), stalefish.NewStopWordFilter()},
 // 	)
-// 	fmt.Println(analyzer.Analyze("I feel TIRED :("))
+// 	fmt.Println(analyzer.Analyze("I feel TIRED :(")) // output: &{[{0 feel } {0 tire } {0 sad }]}
 // }
 
 // func main() {
