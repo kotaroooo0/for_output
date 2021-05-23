@@ -31,15 +31,15 @@ type client struct {
 }
 
 func (c *client) update(ctx context.Context) error {
-	err := c.updateWithItem(ctx)
+	err := c.updateWithWeapons(ctx) // 1.Weaponsが存在しなければ、ErrCodeConditionalCheckFailedExceptionを返却
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
 			if aerr.Code() == dynamodb.ErrCodeConditionalCheckFailedException {
-				err = c.updateNoItem(ctx)
+				err = c.updateNoWeapon(ctx) // 2.Weaponsが存在すれば,ErrCodeConditionalCheckFailedExceptionを返却
 				if err != nil {
 					if aerr, ok := err.(awserr.Error); ok {
-						if aerr.Code() == dynamodb.ErrCodeConditionalCheckFailedException {
-							err = c.updateWithItem(ctx)
+						if aerr.Code() == dynamodb.ErrCodeConditionalCheckFailedException { // 1と2の間で別プロセスでWeaponsが追加されていた場合
+							err = c.updateWithWeapons(ctx) // 再びupdateする
 						}
 					}
 				}
@@ -49,7 +49,7 @@ func (c *client) update(ctx context.Context) error {
 	return err
 }
 
-func (c *client) updateWithItem(ctx context.Context) error {
+func (c *client) updateWithWeapons(ctx context.Context) error {
 	updateItemInput := &dynamodb.UpdateItemInput{
 		TableName: aws.String("Users"),
 		Key: map[string]*dynamodb.AttributeValue{
@@ -63,13 +63,13 @@ func (c *client) updateWithItem(ctx context.Context) error {
 			":st": {S: aws.String("normal")},
 		},
 		UpdateExpression:    aws.String("set #WEAPONS.#WEAPON = :st"),
-		ConditionExpression: aws.String("attribute_exists(Id) and attribute_exists(Weapons)"),
+		ConditionExpression: aws.String("attribute_exists(Id) and attribute_exists(Weapons)"), // WeaponsがなければConditionalCheckFailedExceptionを発生させる
 	}
 	_, err := c.dynamodb.UpdateItemWithContext(ctx, updateItemInput)
 	return err
 }
 
-func (c *client) updateNoItem(ctx context.Context) error {
+func (c *client) updateNoWeapon(ctx context.Context) error {
 	updateItemInput := &dynamodb.UpdateItemInput{
 		TableName: aws.String("Users"),
 		Key: map[string]*dynamodb.AttributeValue{
@@ -84,7 +84,7 @@ func (c *client) updateNoItem(ctx context.Context) error {
 			}},
 		},
 		UpdateExpression:    aws.String("set #WEAPONS = :map"),
-		ConditionExpression: aws.String("attribute_exists(Id) and attribute_not_exists(Weapons)"),
+		ConditionExpression: aws.String("attribute_exists(Id) and attribute_not_exists(Weapons)"), // WeaponsがあればConditionalCheckFailedExceptionを発生させる
 	}
 	_, err := c.dynamodb.UpdateItemWithContext(ctx, updateItemInput)
 	return err
