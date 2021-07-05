@@ -24,16 +24,54 @@ class SearchSimulation extends Simulation {
   // A scenario is a chain of requests and pauses
   val scn = scenario("Scenario Name")
     .feed(searchFeeder)
-    .exec(
-      http("request_1")
-        .get("/shakespeare/_search")
-        .header("Content-Type", "application/json")
-        .body(
-          StringBody(
-            """{"query":{"match":{"text_entry":"${keyword}"}}}"""
-          )
-        ).asJson
-    )
-
-  setUp(scn.inject(constantUsersPerSec(3) during (10 seconds)).protocols(httpProtocol))
+    .doIfEqualsOrElse("${speaker}", "") {
+      doIfEqualsOrElse("${play_name}", "") {
+        exec(
+          http("request_1")
+            .get("/shakespeare/_search")
+            .header("Content-Type", "application/json")
+            .body(
+              StringBody(
+                """{"query":{"match":{"text_entry":"${text_entry}"}}}"""
+              )
+            ).asJson
+        )
+      }{
+        exec(
+          http("request_1")
+            .get("/shakespeare/_search")
+            .header("Content-Type", "application/json")
+            .body(
+              StringBody(
+                """{"query":{"bool":{"should":[{"match":{"text_entry":"${text_entry}"}},{"match":{"play_name":"${play_name}"}}]}}}"""
+              )
+            ).asJson
+        )
+      }
+    } {
+      doIfEqualsOrElse("${play_name}", "") {
+        exec(
+          http("request_1")
+            .get("/shakespeare/_search")
+            .header("Content-Type", "application/json")
+            .body(
+              StringBody(
+                """{"query":{"bool":{"should":[{"match":{"text_entry":"${text_entry}"}},{"match":{"speaker":"${speaker}"}}]}}}"""
+              )
+            ).asJson
+        )
+      }{
+        exec(
+          http("request_1")
+            .get("/shakespeare/_search")
+            .header("Content-Type", "application/json")
+            .body(
+              StringBody(
+                """{"query":{"bool":{"should":[{"match":{"text_entry":"${text_entry}"}},{"match":{"speaker":"${speaker}"}},{"match":{"play_name":"${play_name}"}}]}}}"""
+              )
+            ).asJson
+        )
+      }
+    }
+  setUp(scn.inject(constantUsersPerSec(30) during (10 seconds)).protocols(httpProtocol))
 }
