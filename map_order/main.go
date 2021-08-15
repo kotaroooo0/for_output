@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-
-	"github.com/golang/go/src/strings"
 )
 
 func main() {
@@ -11,5 +9,4 @@ func main() {
 	for k, v := range m {
 		fmt.Print(k, v, " ")
 	}
-	strings.Join()
 }
