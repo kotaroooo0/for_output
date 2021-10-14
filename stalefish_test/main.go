@@ -3,8 +3,6 @@ package main
 import (
 	"fmt"
 
-	"github.com/k0kubun/pp"
-	"github.com/kotaroooo0/gojaconv/jaconv"
 	"github.com/kotaroooo0/stalefish"
 )
 
@@ -33,54 +31,25 @@ import (
 // }
 
 func main() {
-
-	hebon := jaconv.ToHebon("おはよう")
-	fmt.Println(hebon) // ohayo
-
 	db, _ := stalefish.NewDBClient(stalefish.NewDBConfig("root", "password", "127.0.0.1", "3306", "stalefish"))
 	storage := stalefish.NewStorageRdbImpl(db)
 	analyzer := stalefish.NewAnalyzer([]stalefish.CharFilter{}, stalefish.NewStandardTokenizer(), []stalefish.TokenFilter{stalefish.NewLowercaseFilter()})
 
 	indexer := stalefish.NewIndexer(storage, analyzer)
-	indexer.AddDocument(stalefish.NewDocument("Go Ruby PHP"))
-	indexer.AddDocument(stalefish.NewDocument("Go PHP Python"))
-	indexer.AddDocument(stalefish.NewDocument("Go Python Ruby"))
+	for _, body := range []string{"Go Ruby", "Go", "Ruby", "Go PHP", "Ruby PHP JS"} {
+		indexer.AddDocument(stalefish.NewDocument(body))
+	}
 
-	pp.Println(storage.GetInvertedIndexByTokenIDs([]stalefish.TokenID{stalefish.TokenID(0), stalefish.TokenID(1)}))
-
-	mq := stalefish.NewMatchQuery("GO PHP", stalefish.AND, analyzer)
+	sorter := stalefish.NewTfIdfSorter(storage)
+	mq := stalefish.NewMatchQuery("GO Ruby", stalefish.OR, analyzer, sorter)
 	mseacher := mq.Searcher(storage)
 	result, _ := mseacher.Search()
-	fmt.Println(result) // result: [{1 Go Ruby PHP} {2 Go PHP Python}]
+	fmt.Println(result) // [{1 Go Ruby 2} {2 Go 1} {3 Ruby 1} {4 Go PHP 2} {5 Ruby PHP JS 3}]
 
-	pq := stalefish.NewPhraseQuery("GO PHP", analyzer)
+	pq := stalefish.NewPhraseQuery("go RUBY", analyzer, nil)
 	pseacher := pq.Searcher(storage)
 	result, _ = pseacher.Search()
-	fmt.Println(result) // result: [{2 Go PHP Python}]
-
-	// stalefish.InvertedIndex{
-	// 	0x0000000000000001: stalefish.PostingList{
-	// 	  Postings: &stalefish.Postings{
-	// 		DocumentID: 0x0000000000000001,
-	// 		Positions:  []uint64{
-	// 		  0x0000000000000000,
-	// 		},
-	// 		Next: &stalefish.Postings{
-	// 		  DocumentID: 0x0000000000000002,
-	// 		  Positions:  []uint64{
-	// 			0x0000000000000000,
-	// 		  },
-	// 		  Next: &stalefish.Postings{
-	// 			DocumentID: 0x0000000000000003,
-	// 			Positions:  []uint64{
-	// 			  0x0000000000000000,
-	// 			},
-	// 			Next: (*stalefish.Postings)(nil),
-	// 		  },
-	// 		},
-	// 	  },
-	// 	},
-	//   }
+	fmt.Println(result) // [{1 Go Ruby 2}]
 }
 
 // func main() {
