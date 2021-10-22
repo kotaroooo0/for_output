@@ -6,37 +6,13 @@ import (
 	"github.com/kotaroooo0/stalefish"
 )
 
-// func main() {
-// 	db, _ := stalefish.NewDBClient(stalefish.NewDBConfig("root", "password", "127.0.0.1", "3306", "stalefish"))
-// 	storage := stalefish.NewStorageRdbImpl(db)
-// 	analyzer := stalefish.NewAnalyzer(
-// 		[]stalefish.CharFilter{}, stalefish.NewStandardTokenizer(), []stalefish.TokenFilter{stalefish.NewStemmerFilter(), stalefish.NewLowercaseFilter(), stalefish.NewStopWordFilter()},
-// 	)
-
-// 	indexer := stalefish.NewIndexer(storage, analyzer)
-// 	indexer.AddDocument(stalefish.NewDocument("You can watch lots of interesting dramas on Amazon Prime."))
-// 	indexer.AddDocument(stalefish.NewDocument("Forest phenomena in the Amazon are a prime concern."))
-
-// 	pq := stalefish.NewPhraseQuery("amAzon PRime", *analyzer)
-// 	pseacher := pq.Searcher(storage)
-// 	result, _ := pseacher.Search()
-// 	fmt.Println(result)
-// 	// result: [{1 You can watch lots of interesting dramas on Amazon Prime.}]
-
-// 	mq := stalefish.NewMatchQuery("amazon concerns", stalefish.AND, *analyzer)
-// 	mseacher := mq.Searcher(storage)
-// 	result, _ = mseacher.Search()
-// 	fmt.Println(result)
-// 	// result: [{2 Forest phenomena in the Amazon are a prime concern.}]
-// }
-
 func main() {
 	db, _ := stalefish.NewDBClient(stalefish.NewDBConfig("root", "password", "127.0.0.1", "3306", "stalefish"))
 	storage := stalefish.NewStorageRdbImpl(db)
 	analyzer := stalefish.NewAnalyzer([]stalefish.CharFilter{}, stalefish.NewStandardTokenizer(), []stalefish.TokenFilter{stalefish.NewLowercaseFilter()})
 
-	indexer := stalefish.NewIndexer(storage, analyzer)
-	for _, body := range []string{"Go Ruby", "Go", "Ruby", "Go PHP", "Ruby PHP JS"} {
+	indexer := stalefish.NewIndexer(storage, analyzer, 1)
+	for _, body := range []string{"Ruby PHP JS", "Go Ruby", "Ruby Go PHP", "Go PHP"} {
 		indexer.AddDocument(stalefish.NewDocument(body))
 	}
 
@@ -44,21 +20,21 @@ func main() {
 	mq := stalefish.NewMatchQuery("GO Ruby", stalefish.OR, analyzer, sorter)
 	mseacher := mq.Searcher(storage)
 	result, _ := mseacher.Search()
-	fmt.Println(result) // [{1 Go Ruby 2} {2 Go 1} {3 Ruby 1} {4 Go PHP 2} {5 Ruby PHP JS 3}]
+	fmt.Println(result) // [{2 Go Ruby 2} {3 Ruby Go PHP 3} {4 Go PHP 2} {1 Ruby PHP JS 3}]
 
 	pq := stalefish.NewPhraseQuery("go RUBY", analyzer, nil)
 	pseacher := pq.Searcher(storage)
 	result, _ = pseacher.Search()
-	fmt.Println(result) // [{1 Go Ruby 2}]
+	fmt.Println(result) // [{2 Go Ruby 2}
 }
 
 // func main() {
 // 	analyzer := stalefish.NewAnalyzer(
 // 		[]stalefish.CharFilter{stalefish.NewMappingCharFilter(map[string]string{":(": "sad"})},
 // 		stalefish.NewStandardTokenizer(),
-// 		[]stalefish.TokenFilter{stalefish.NewLowercaseFilter(), stalefish.NewStemmerFilter(), stalefish.NewStopWordFilter()},
+// 		[]stalefish.TokenFilter{stalefish.NewLowercaseFilter(), stalefish.NewStemmerFilter(), stalefish.NewStopWordFilter([]string{"i", "my", "me", "the", "a", "for"})},
 // 	)
-// 	fmt.Println(analyzer.Analyze("I feel TIRED :(")) // output: &{[{0 feel } {0 tire } {0 sad }]}
+// 	fmt.Println(analyzer.Analyze("I feel TIRED :(")) // {[{0 feel } {0 tire } {0 sad }]}
 // }
 
 // func main() {
